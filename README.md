@@ -4,12 +4,13 @@ A Model Context Protocol (MCP) server for fetching traffic analytics data from t
 
 ## Features
 
-This MCP server provides four tools to interact with Clicky analytics:
+This MCP server provides five tools to interact with Clicky analytics:
 
 - **`get_total_visitors`** - Get total visitors for a date range
-- **`get_domain_visitors`** - Get visitors filtered by referrer domain 
+- **`get_domain_visitors`** - Get visitors filtered by referrer domain
 - **`get_top_pages`** - Get top pages for a date range
 - **`get_traffic_sources`** - Get traffic sources breakdown for a date range
+- **`get_page_traffic`** - Get traffic data for a specific page by URL
 
 ## Setup
 
@@ -38,7 +39,7 @@ npm run dev
 You need to provide your Clicky analytics credentials to use this server. Get these from your Clicky account:
 
 1. **Get your credentials** from your Clicky account:
-   - Site ID: Available in your site preferences 
+   - Site ID: Available in your site preferences
    - Site Key: Available in your site preferences under "Preferences" → "Info"
 
 2. **Configure credentials** using one of these methods:
@@ -62,6 +63,39 @@ You need to provide your Clicky analytics credentials to use this server. Get th
    ```
 
 ⚠️ **Security Note**: Never commit your actual credentials to version control. The `.env` file is already included in `.gitignore` for security.
+
+## Using with Claude Desktop
+
+To use this MCP server with Claude Desktop, you need to add it to your Claude Desktop configuration:
+
+1. **Locate your Claude Desktop config file:**
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+2. **Add the MCP server to your config:**
+   ```json
+   {
+     "mcpServers": {
+       "clicky-analytics": {
+         "command": "node",
+         "args": ["/path/to/clicky-mcp/dist/index.js"],
+         "env": {
+           "CLICKY_SITE_ID": "YOUR_SITE_ID",
+           "CLICKY_SITE_KEY": "YOUR_SITE_KEY"
+         }
+       }
+     }
+   }
+   ```
+
+3. **Update the path**: Replace `/path/to/clicky-mcp/` with the actual path to your cloned repository.
+
+4. **Add your credentials**: Replace `YOUR_SITE_ID` and `YOUR_SITE_KEY` with your actual Clicky credentials.
+
+5. **Restart Claude Desktop** for the changes to take effect.
+
+Once configured, you'll be able to use tools like "get traffic sources for my website" or "show me top pages from last week" directly in Claude Desktop conversations.
 
 ## Available Tools
 
@@ -87,14 +121,14 @@ Get visitor data filtered by referrer domain.
 
 **Parameters:**
 - `domain` (string, required): Domain name to filter by (e.g., "facebook", "google")
-- `start_date` (string, required): Start date in YYYY-MM-DD format  
+- `start_date` (string, required): Start date in YYYY-MM-DD format
 - `end_date` (string, required): End date in YYYY-MM-DD format
 
 **Example:**
 ```json
 {
   "domain": "facebook",
-  "start_date": "2024-01-01", 
+  "start_date": "2024-01-01",
   "end_date": "2024-01-31"
 }
 ```
@@ -135,6 +169,26 @@ Get traffic sources breakdown showing where visitors come from.
 
 **Returns:** Clean breakdown of traffic sources with visitor counts and percentages for sources like Direct, Search engines, Social media, Links, etc.
 
+### get_page_traffic
+
+Get traffic data for a specific page by filtering with its URL.
+
+**Parameters:**
+- `url` (string, required): Full URL or path of the page (e.g., "https://example.com/page" or "/page")
+- `start_date` (string, required): Start date in YYYY-MM-DD format
+- `end_date` (string, required): End date in YYYY-MM-DD format
+
+**Example:**
+```json
+{
+  "url": "https://news.ycombinator.com/show",
+  "start_date": "2024-01-01",
+  "end_date": "2024-01-31"
+}
+```
+
+**Returns:** Traffic data for the specific page including visitor counts, actions, and other page-specific metrics.
+
 ## API Limitations
 
 - Maximum date range: 31 days (enforced by Clicky API)
@@ -164,7 +218,8 @@ clicky-mcp/
 │       ├── get-total-visitors.ts
 │       ├── get-domain-visitors.ts
 │       ├── get-top-pages.ts
-│       └── get-traffic-sources.ts
+│       ├── get-traffic-sources.ts
+│       └── get-page-traffic.ts
 ├── package.json
 ├── tsconfig.json
 └── README.md

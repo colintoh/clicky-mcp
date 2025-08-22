@@ -13,6 +13,7 @@ import { getTotalVisitorsTool, handleGetTotalVisitors } from './tools/get-total-
 import { getDomainVisitorsTool, handleGetDomainVisitors } from './tools/get-domain-visitors.js';
 import { getTopPagesTool, handleGetTopPages } from './tools/get-top-pages.js';
 import { getTrafficSourcesTool, handleGetTrafficSources } from './tools/get-traffic-sources.js';
+import { getPageTrafficTool, handleGetPageTraffic } from './tools/get-page-traffic.js';
 
 // config({ path: '.env' });
 
@@ -93,6 +94,7 @@ class ClickyMCPServer {
         getDomainVisitorsTool,
         getTopPagesTool,
         getTrafficSourcesTool,
+        getPageTrafficTool,
       ],
     }));
 
@@ -112,6 +114,9 @@ class ClickyMCPServer {
 
           case 'get_traffic_sources':
             return await handleGetTrafficSources(args as any, this.clickyClient);
+
+          case 'get_page_traffic':
+            return await handleGetPageTraffic(args as any, this.clickyClient);
 
           default:
             throw new Error(`Unknown tool: ${name}`);

@@ -108,4 +108,34 @@ export class ClickyClient {
 
     return response.data;
   }
+
+  async getPageTraffic(url: string, dateRange: DateRange): Promise<any> {
+    this.validateDateRange(dateRange);
+
+    // Extract path from URL and encode it
+    let path: string;
+    try {
+      const urlObj = new URL(url);
+      path = urlObj.pathname;
+    } catch (error) {
+      // If URL parsing fails, assume it's already a path
+      path = url.startsWith('/') ? url : '/' + url;
+    }
+
+    // Use raw path - Axios will handle the URL encoding automatically
+    const filterPath = path;
+
+    const response = await this.client.get('', {
+      params: {
+        site_id: this.siteId,
+        sitekey: this.siteKey,
+        type: 'pages',
+        filter: filterPath,
+        date: `${dateRange.startDate},${dateRange.endDate}`,
+        output: 'json'
+      }
+    });
+
+    return response.data;
+  }
 }
