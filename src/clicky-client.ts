@@ -1,0 +1,111 @@
+import axios, { AxiosInstance } from 'axios';
+
+export interface ClickyConfig {
+  siteId: string;
+  siteKey: string;
+  baseUrl?: string;
+}
+
+export interface DateRange {
+  startDate: string; // YYYY-MM-DD
+  endDate: string;   // YYYY-MM-DD
+}
+
+export class ClickyClient {
+  private client: AxiosInstance;
+  private siteId: string;
+  private siteKey: string;
+
+  constructor(config: ClickyConfig) {
+    this.siteId = config.siteId;
+    this.siteKey = config.siteKey;
+
+    this.client = axios.create({
+      baseURL: config.baseUrl || 'https://api.clicky.com/api/stats/4',
+      timeout: 30000,
+    });
+  }
+
+  private validateDateRange(dateRange: DateRange): void {
+    const start = new Date(dateRange.startDate);
+    const end = new Date(dateRange.endDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays > 31) {
+      throw new Error('Date range cannot exceed 31 days as per Clicky API limits');
+    }
+
+    if (start > end) {
+      throw new Error('Start date must be before or equal to end date');
+    }
+  }
+
+  async getTotalVisitors(dateRange: DateRange): Promise<any> {
+    this.validateDateRange(dateRange);
+
+    const response = await this.client.get('', {
+      params: {
+        site_id: this.siteId,
+        sitekey: this.siteKey,
+        type: 'visitors',
+        date: `${dateRange.startDate},${dateRange.endDate}`,
+        output: 'json'
+      }
+    });
+
+    return response.data;
+  }
+
+  async getDomainVisitors(domain: string, dateRange: DateRange): Promise<any> {
+    this.validateDateRange(dateRange);
+
+    const response = await this.client.get('', {
+      params: {
+        site_id: this.siteId,
+        sitekey: this.siteKey,
+        type: 'links-domains',
+        filter: domain,
+        date: `${dateRange.startDate},${dateRange.endDate}`,
+        output: 'json'
+      }
+    });
+
+    return response.data;
+  }
+
+  async getTopPages(dateRange: DateRange, limit?: number): Promise<any> {
+    this.validateDateRange(dateRange);
+
+    const params: any = {
+      site_id: this.siteId,
+      sitekey: this.siteKey,
+      type: 'pages',
+      date: `${dateRange.startDate},${dateRange.endDate}`,
+      output: 'json'
+    };
+
+    if (limit) {
+      params.limit = Math.min(limit, 1000); // API max is 1000
+    }
+
+    const response = await this.client.get('', { params });
+    return response.data;
+  }
+
+  async getTrafficSources(dateRange: DateRange): Promise<any> {
+    this.validateDateRange(dateRange);
+
+    const response = await this.client.get('', {
+      params: {
+        site_id: this.siteId,
+        sitekey: this.siteKey,
+        type: 'traffic-sources',
+        date: `${dateRange.startDate},${dateRange.endDate}`,
+        output: 'json'
+      }
+    });
+
+    return response.data;
+  }
+}
