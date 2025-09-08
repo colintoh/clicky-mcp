@@ -93,18 +93,37 @@ export class ClickyClient {
     return response.data;
   }
 
-  async getTrafficSources(dateRange: DateRange): Promise<any> {
+  async getTrafficSources(dateRange: DateRange, pageUrl?: string): Promise<any> {
     this.validateDateRange(dateRange);
 
-    const response = await this.client.get('', {
-      params: {
-        site_id: this.siteId,
-        sitekey: this.siteKey,
-        type: 'traffic-sources',
-        date: `${dateRange.startDate},${dateRange.endDate}`,
-        output: 'json'
+    let params: any = {
+      site_id: this.siteId,
+      sitekey: this.siteKey,
+      date: `${dateRange.startDate},${dateRange.endDate}`,
+      output: 'json'
+    };
+
+    if (pageUrl) {
+      // Extract path from URL and encode it
+      let path: string;
+      try {
+        const urlObj = new URL(pageUrl);
+        path = urlObj.pathname;
+      } catch (error) {
+        // If URL parsing fails, assume it's already a path
+        path = pageUrl.startsWith('/') ? pageUrl : '/' + pageUrl;
       }
-    });
+
+      // Use segmentation API for page-specific traffic sources
+      params.type = 'segmentation';
+      params.href = path; // Axios will handle the URL encoding automatically
+      params.segments = 'traffic-sources';
+    } else {
+      // Use general traffic sources API
+      params.type = 'traffic-sources';
+    }
+
+    const response = await this.client.get('', { params });
 
     return response.data;
   }

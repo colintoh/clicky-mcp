@@ -3,7 +3,7 @@ import { ClickyClient, DateRange } from '../clicky-client.js';
 
 export const getTrafficSourcesTool: Tool = {
   name: 'get_traffic_sources',
-  description: 'Get traffic sources breakdown from Clicky analytics',
+  description: 'Get traffic sources breakdown from Clicky analytics. Optionally filter by specific page URL.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -16,6 +16,10 @@ export const getTrafficSourcesTool: Tool = {
         type: 'string',
         pattern: '^\\d{4}-\\d{2}-\\d{2}$',
         description: 'End date in YYYY-MM-DD format'
+      },
+      page_url: {
+        type: 'string',
+        description: 'Optional: Full URL or path of the page to get traffic sources for (e.g., https://example.com/path or /path)'
       }
     },
     required: ['start_date', 'end_date']
@@ -23,7 +27,7 @@ export const getTrafficSourcesTool: Tool = {
 };
 
 export async function handleGetTrafficSources(
-  args: { start_date: string; end_date: string },
+  args: { start_date: string; end_date: string; page_url?: string },
   clickyClient: ClickyClient
 ) {
   try {
@@ -32,7 +36,7 @@ export async function handleGetTrafficSources(
       endDate: args.end_date
     };
 
-    const data = await clickyClient.getTrafficSources(dateRange);
+    const data = await clickyClient.getTrafficSources(dateRange, args.page_url);
 
     // Transform the response to be LLM-friendly
     const cleanedData = data.map((typeData: any) => ({
