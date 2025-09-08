@@ -153,17 +153,27 @@ Get the most popular pages for a date range.
 
 ### get_traffic_sources
 
-Get traffic sources breakdown showing where visitors come from.
+Get traffic sources breakdown showing where visitors come from. Optionally filter by specific page URL.
 
 **Parameters:**
 - `start_date` (string, required): Start date in YYYY-MM-DD format
 - `end_date` (string, required): End date in YYYY-MM-DD format
+- `page_url` (string, optional): Full URL or path of the page to get traffic sources for (e.g., "https://example.com/path" or "/path")
 
 **Example:**
 ```json
 {
   "start_date": "2024-01-01",
   "end_date": "2024-01-31"
+}
+```
+
+**Example with page filter:**
+```json
+{
+  "start_date": "2024-01-01",
+  "end_date": "2024-01-31",
+  "page_url": "https://example.com/blog/post"
 }
 ```
 
