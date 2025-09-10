@@ -57,19 +57,24 @@ export class ClickyClient {
     return response.data;
   }
 
-  async getDomainVisitors(domain: string, dateRange: DateRange): Promise<any> {
+  async getDomainVisitors(domain: string, dateRange: DateRange, segments?: string[], limit?: number): Promise<any> {
     this.validateDateRange(dateRange);
 
-    const response = await this.client.get('', {
-      params: {
-        site_id: this.siteId,
-        sitekey: this.siteKey,
-        type: 'links-domains',
-        filter: domain,
-        date: `${dateRange.startDate},${dateRange.endDate}`,
-        output: 'json'
-      }
-    });
+    const params: any = {
+      site_id: this.siteId,
+      sitekey: this.siteKey,
+      type: 'segmentation',
+      domain: domain,
+      segments: segments ? segments.join(',') : 'visitors',
+      date: `${dateRange.startDate},${dateRange.endDate}`,
+      output: 'json'
+    };
+
+    if (limit) {
+      params.limit = Math.min(limit, 1000); // API max is 1000
+    }
+
+    const response = await this.client.get('', { params });
 
     return response.data;
   }

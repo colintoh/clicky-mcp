@@ -117,19 +117,34 @@ Get total visitor counts for a specified date range.
 
 ### get_domain_visitors
 
-Get visitor data filtered by referrer domain.
+Get visitor data filtered by referrer domain with optional segmentation data.
 
 **Parameters:**
-- `domain` (string, required): Domain name to filter by (e.g., "facebook", "google")
+- `domain` (string, required): Domain name to filter by (e.g., "facebook.com", "google.com")
 - `start_date` (string, required): Start date in YYYY-MM-DD format
 - `end_date` (string, required): End date in YYYY-MM-DD format
+- `segments` (array, optional): Array of segments to include. Options: "pages", "visitors". Defaults to "visitors" only.
+  - "visitors": Gets the total number of visitors from the domain
+  - "pages": Gets the list of pages and their visit counts from the domain
+- `limit` (number, optional): Maximum number of results to return (1-1000)
 
-**Example:**
+**Basic Example (visitor count only):**
 ```json
 {
-  "domain": "facebook",
+  "domain": "facebook.com",
   "start_date": "2024-01-01",
   "end_date": "2024-01-31"
+}
+```
+
+**Advanced Example (with segmentation):**
+```json
+{
+  "domain": "facebook.com",
+  "start_date": "2024-01-01",
+  "end_date": "2024-01-31",
+  "segments": ["pages", "visitors"],
+  "limit": 100
 }
 ```
 
