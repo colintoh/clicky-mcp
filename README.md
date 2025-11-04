@@ -2,6 +2,10 @@
 
 A Model Context Protocol (MCP) server for fetching traffic analytics data from the Clicky API.
 
+<a href="https://glama.ai/mcp/servers/@colintoh/clicky-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@colintoh/clicky-mcp/badge" alt="Clicky Server MCP server" />
+</a>
+
 ## Features
 
 This MCP server provides five tools to interact with Clicky analytics:
