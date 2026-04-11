@@ -22,7 +22,13 @@ import { getSearchesTool, handleGetSearches } from './tools/get-searches.js';
 import { getReferringDomainsTool, handleGetReferringDomains } from './tools/get-referring-domains.js';
 
 function getCredentials() {
-  config({ path: '.env' });
+  // Only load .env if credentials aren't already in the environment.
+  // Claude Desktop and other MCP hosts pass credentials via the config
+  // block, in which case dotenv would be a no-op anyway — and its stdout
+  // tip line corrupts the JSON-RPC channel on stdio transports.
+  if (!process.env.CLICKY_SITE_ID || !process.env.CLICKY_SITE_KEY) {
+    config({ path: '.env', quiet: true });
+  }
 
   const args = process.argv.slice(2);
   let siteId = '';
