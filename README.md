@@ -30,8 +30,8 @@ Then pick your MCP host below.
    {
      "mcpServers": {
        "clicky-analytics": {
-         "command": "ABSOLUTE_PATH_TO_NODE",
-         "args": ["ABSOLUTE_PATH_TO_CLICKY_MCP/dist/index.js"],
+         "command": "ABSOLUTE_PATH_TO_NODE", // e.g. /Users/.../.nvm/versions/node/v25.2.1/bin/node
+         "args": ["ABSOLUTE_PATH_TO_CLICKY_MCP_FOLDER/dist/index.js"], // e.g. /Users/.../clicky-mcp/dist/index.js
          "env": {
            "CLICKY_SITE_ID": "YOUR_SITE_ID",
            "CLICKY_SITE_KEY": "YOUR_SITE_KEY"
@@ -159,11 +159,7 @@ Imposed by Clicky, not by this server:
 
 **"Claude Desktop doesn't see the server."** Check the spawn log at `~/Library/Logs/Claude/mcp-server-clicky-analytics.log`. The most common cause is `node` not being on Claude Desktop's launchd PATH — fix by replacing `"command": "node"` with the absolute path from `which node`. The second-most-common cause is forgetting to fully quit Claude Desktop (`⌘Q`, not just close the window).
 
-**`Unexpected token 'd'` or similar JSON parse errors in the log.** That was a real bug from an old build where `dotenv` printed its tip line to stdout (which is the JSON-RPC channel for stdio MCP servers). Fixed in commit `a386c59` — pull, `npm run build`, restart your host.
-
 **"Date range cannot exceed 31 days."** That's a Clicky API limit, not us. Either narrow the range or use a `date_range` keyword like `last-30-days`.
-
-**Anything else?** The codebase is small (~15 source files). Start with [`src/index.ts`](src/index.ts) for the dispatcher and [`src/clicky-client.ts`](src/clicky-client.ts) for the API calls.
 
 ---
 
