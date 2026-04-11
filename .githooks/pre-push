@@ -1,0 +1,17 @@
+#!/bin/sh
+# Run unit tests before any push that updates main on the remote.
+# Bypass with `git push --no-verify` for emergencies.
+
+while read local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/main)
+      echo "[pre-push] push targets main — running npm test…"
+      if ! npm test; then
+        echo "[pre-push] tests failed, aborting push to main" >&2
+        exit 1
+      fi
+      ;;
+  esac
+done
+
+exit 0

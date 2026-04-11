@@ -2,10 +2,10 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { ClickyClient } from '../clicky-client.js';
 import { buildDateParam, CLICKY_DATE_KEYWORDS, DateInput } from '../date-utils.js';
 
-export const getTopPagesTool: Tool = {
-  name: 'get_top_pages',
+export const getBounceRateTool: Tool = {
+  name: 'get_bounce_rate',
   description:
-    'Get top pages for a date range from Clicky analytics. Provide EITHER start_date+end_date OR date_range.',
+    'Get bounce rate and average time-on-site for a date range. Provide EITHER start_date+end_date OR date_range.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -24,22 +24,13 @@ export const getTopPagesTool: Tool = {
         enum: [...CLICKY_DATE_KEYWORDS],
         description: 'Clicky relative date keyword (alternative to start_date+end_date)',
       },
-      limit: {
-        type: 'number',
-        minimum: 1,
-        maximum: 1000,
-        description: 'Maximum number of pages to return (max 1000)',
-      },
     },
   },
 };
 
-export async function handleGetTopPages(
-  args: DateInput & { limit?: number },
-  clickyClient: ClickyClient
-) {
+export async function handleGetBounceRate(args: DateInput, clickyClient: ClickyClient) {
   const date = buildDateParam(args);
-  const data = await clickyClient.getTopPages(date, args.limit);
+  const data = await clickyClient.getBounceRate(date);
   return {
     content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
   };

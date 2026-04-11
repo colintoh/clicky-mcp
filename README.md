@@ -2,249 +2,231 @@
 
 A Model Context Protocol (MCP) server for fetching traffic analytics data from the Clicky API.
 
-## Features
+## Install for AI agents (one-shot)
 
-This MCP server provides five tools to interact with Clicky analytics:
+If you are an AI agent installing this MCP for a user, follow these exact steps:
 
-- **`get_total_visitors`** - Get total visitors for a date range
-- **`get_domain_visitors`** - Get visitors filtered by referrer domain
-- **`get_top_pages`** - Get top pages for a date range
-- **`get_traffic_sources`** - Get traffic sources breakdown for a date range
-- **`get_page_traffic`** - Get traffic data for a specific page by URL
-
-## Setup
-
-1. Install dependencies:
-```bash
-npm install
-```
-
-2. Build the project:
-```bash
-npm run build
-```
-
-3. Run the server:
-```bash
-npm start
-```
-
-Or for development:
-```bash
-npm run dev
-```
-
-## Configuration
-
-You need to provide your Clicky analytics credentials to use this server. Get these from your Clicky account:
-
-1. **Get your credentials** from your Clicky account:
-   - Site ID: Available in your site preferences
-   - Site Key: Available in your site preferences under "Preferences" → "Info"
-
-2. **Configure credentials** using one of these methods:
-
-   **Option 1: Environment variables**
+1. Clone and build:
    ```bash
-   export CLICKY_SITE_ID="YOUR_SITE_ID"
-   export CLICKY_SITE_KEY="YOUR_SITE_KEY"
+   git clone <repo-url> clicky-mcp
+   cd clicky-mcp && npm install && npm run build
    ```
-
-   **Option 2: Command line arguments**
-   ```bash
-   npm start -- --site-id YOUR_SITE_ID --site-key YOUR_SITE_KEY
-   ```
-
-   **Option 3: .env file**
-   ```bash
-   # Create .env file in project root
-   CLICKY_SITE_ID=YOUR_SITE_ID
-   CLICKY_SITE_KEY=YOUR_SITE_KEY
-   ```
-
-⚠️ **Security Note**: Never commit your actual credentials to version control. The `.env` file is already included in `.gitignore` for security.
-
-## Using with Claude Desktop
-
-To use this MCP server with Claude Desktop, you need to add it to your Claude Desktop configuration:
-
-1. **Locate your Claude Desktop config file:**
-   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-   - **Linux**: `~/.config/Claude/claude_desktop_config.json`
-
-2. **Add the MCP server to your config:**
+2. Ask the user for their Clicky **Site ID** and **Site Key** (found at https://clicky.com/user/preferences/site).
+3. Locate the Claude Desktop config file (create it if missing):
+   - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+   - Linux: `~/.config/Claude/claude_desktop_config.json`
+4. Merge this into the file's `mcpServers` object (replace the three `ALL_CAPS` tokens):
    ```json
    {
      "mcpServers": {
        "clicky-analytics": {
          "command": "node",
-         "args": ["/path/to/clicky-mcp/dist/index.js"],
+         "args": ["ABSOLUTE_PATH_TO_CLICKY_MCP/dist/index.js"],
          "env": {
-           "CLICKY_SITE_ID": "YOUR_SITE_ID",
-           "CLICKY_SITE_KEY": "YOUR_SITE_KEY"
+           "CLICKY_SITE_ID": "USER_SITE_ID",
+           "CLICKY_SITE_KEY": "USER_SITE_KEY"
          }
        }
      }
    }
    ```
+5. Ask the user to fully restart Claude Desktop. Verify by asking Claude *"list my Clicky MCP tools"* — 11 tools should appear.
 
-3. **Update the path**: Replace `/path/to/clicky-mcp/` with the actual path to your cloned repository.
+## Features
 
-4. **Add your credentials**: Replace `YOUR_SITE_ID` and `YOUR_SITE_KEY` with your actual Clicky credentials.
+This MCP server provides 11 tools to interact with Clicky analytics:
 
-5. **Restart Claude Desktop** for the changes to take effect.
+- **`get_total_visitors`** — Total visitors for a date range
+- **`get_domain_visitors`** — Visitors filtered by referrer domain (with optional segmentation)
+- **`get_top_pages`** — Most popular pages for a date range
+- **`get_traffic_sources`** — Traffic sources breakdown (optionally per page)
+- **`get_page_traffic`** — Traffic data for a specific page URL
+- **`get_visitors_online`** — Currently-online visitors (real-time)
+- **`get_actions`** — Total pageviews/actions for a date range
+- **`get_bounce_rate`** — Bounce rate and average time-on-site
+- **`get_countries`** — Visitor breakdown by country
+- **`get_searches`** — Top search terms bringing traffic
+- **`get_referring_domains`** — Top referring domains
 
-Once configured, you'll be able to use tools like "get traffic sources for my website" or "show me top pages from last week" directly in Claude Desktop conversations.
+## Setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Build the project:
+   ```bash
+   npm run build
+   ```
+3. Run the server:
+   ```bash
+   npm start
+   ```
+   Or for development:
+   ```bash
+   npm run dev
+   ```
+
+## Configuration
+
+You need to provide your Clicky analytics credentials. Get them from your Clicky account preferences (Site ID and Site Key).
+
+**Option 1: Environment variables**
+```bash
+export CLICKY_SITE_ID="YOUR_SITE_ID"
+export CLICKY_SITE_KEY="YOUR_SITE_KEY"
+```
+
+**Option 2: Command line arguments**
+```bash
+npm start -- --site-id YOUR_SITE_ID --site-key YOUR_SITE_KEY
+```
+
+**Option 3: .env file**
+```bash
+# Create .env file in project root
+CLICKY_SITE_ID=YOUR_SITE_ID
+CLICKY_SITE_KEY=YOUR_SITE_KEY
+```
+
+⚠️ **Security Note**: Never commit your actual credentials to version control. The `.env` file is already in `.gitignore`.
+
+## Date parameters
+
+Every date-aware tool accepts **either** an explicit date range **or** a Clicky relative-date keyword — but not both:
+
+- Explicit: `start_date` + `end_date`, both `YYYY-MM-DD`, range ≤ 31 days.
+- Keyword: `date_range`, one of:
+  - `today`
+  - `yesterday`
+  - `last-7-days`
+  - `last-30-days`
+  - `this-week`
+  - `last-week`
+  - `this-month`
+  - `last-month`
+  - `this-year`
+  - `last-year`
+
+Example using a keyword:
+```json
+{ "date_range": "last-7-days" }
+```
 
 ## Available Tools
 
 ### get_total_visitors
 
-Get total visitor counts for a specified date range.
+Total visitor counts for a period.
 
-**Parameters:**
-- `start_date` (string, required): Start date in YYYY-MM-DD format
-- `end_date` (string, required): End date in YYYY-MM-DD format
-
-**Example:**
-```json
-{
-  "start_date": "2024-01-01",
-  "end_date": "2024-01-31"
-}
-```
+- `start_date` / `end_date` (string, optional) — explicit YYYY-MM-DD range
+- `date_range` (string, optional) — keyword alternative
 
 ### get_domain_visitors
 
-Get visitor data filtered by referrer domain with optional segmentation data.
+Visitor data filtered by referrer domain, with optional segmentation.
 
-**Parameters:**
-- `domain` (string, required): Domain name to filter by (e.g., "facebook.com", "google.com")
-- `start_date` (string, required): Start date in YYYY-MM-DD format
-- `end_date` (string, required): End date in YYYY-MM-DD format
-- `segments` (array, optional): Array of segments to include. Options: "pages", "visitors". Defaults to "visitors" only.
-  - "visitors": Gets the total number of visitors from the domain
-  - "pages": Gets the list of pages and their visit counts from the domain
-- `limit` (number, optional): Maximum number of results to return (1-1000)
-
-**Basic Example (visitor count only):**
-```json
-{
-  "domain": "facebook.com",
-  "start_date": "2024-01-01",
-  "end_date": "2024-01-31"
-}
-```
-
-**Advanced Example (with segmentation):**
-```json
-{
-  "domain": "facebook.com",
-  "start_date": "2024-01-01",
-  "end_date": "2024-01-31",
-  "segments": ["pages", "visitors"],
-  "limit": 100
-}
-```
+- `domain` (string, **required**)
+- `start_date` / `end_date` **or** `date_range`
+- `segments` (array, optional) — `["pages", "visitors"]`. Defaults to `["visitors"]`.
+- `limit` (number, optional, max 1000)
 
 ### get_top_pages
 
-Get the most popular pages for a date range.
+Most popular pages for a period.
 
-**Parameters:**
-- `start_date` (string, required): Start date in YYYY-MM-DD format
-- `end_date` (string, required): End date in YYYY-MM-DD format
-- `limit` (number, optional): Maximum number of pages to return (1-1000)
-
-**Example:**
-```json
-{
-  "start_date": "2024-01-01",
-  "end_date": "2024-01-31",
-  "limit": 50
-}
-```
+- `start_date` / `end_date` **or** `date_range`
+- `limit` (number, optional, max 1000)
 
 ### get_traffic_sources
 
-Get traffic sources breakdown showing where visitors come from. Optionally filter by specific page URL.
+Traffic sources breakdown — optionally filter by page URL.
 
-**Parameters:**
-- `start_date` (string, required): Start date in YYYY-MM-DD format
-- `end_date` (string, required): End date in YYYY-MM-DD format
-- `page_url` (string, optional): Full URL or path of the page to get traffic sources for (e.g., "https://example.com/path" or "/path")
-
-**Example:**
-```json
-{
-  "start_date": "2024-01-01",
-  "end_date": "2024-01-31"
-}
-```
-
-**Example with page filter:**
-```json
-{
-  "start_date": "2024-01-01",
-  "end_date": "2024-01-31",
-  "page_url": "https://example.com/blog/post"
-}
-```
-
-**Returns:** Clean breakdown of traffic sources with visitor counts and percentages for sources like Direct, Search engines, Social media, Links, etc.
+- `start_date` / `end_date` **or** `date_range`
+- `page_url` (string, optional) — full URL or path
 
 ### get_page_traffic
 
-Get traffic data for a specific page by filtering with its URL.
+Traffic data for a specific page URL.
 
-**Parameters:**
-- `url` (string, required): Full URL or path of the page (e.g., "https://example.com/page" or "/page")
-- `start_date` (string, required): Start date in YYYY-MM-DD format
-- `end_date` (string, required): End date in YYYY-MM-DD format
+- `url` (string, **required**)
+- `start_date` / `end_date` **or** `date_range`
 
-**Example:**
-```json
-{
-  "url": "https://news.ycombinator.com/show",
-  "start_date": "2024-01-01",
-  "end_date": "2024-01-31"
-}
-```
+### get_visitors_online
 
-**Returns:** Traffic data for the specific page including visitor counts, actions, and other page-specific metrics.
+Real-time visitor count and segmentation. Takes no parameters.
+
+### get_actions
+
+Total pageviews/actions for a period.
+
+- `start_date` / `end_date` **or** `date_range`
+- `limit` (number, optional, max 1000)
+
+### get_bounce_rate
+
+Bounce rate and average time-on-site for a period.
+
+- `start_date` / `end_date` **or** `date_range`
+
+### get_countries
+
+Visitor breakdown by country.
+
+- `start_date` / `end_date` **or** `date_range`
+- `limit` (number, optional, max 1000)
+
+### get_searches
+
+Top search terms that brought visitors.
+
+- `start_date` / `end_date` **or** `date_range`
+- `limit` (number, optional, max 1000)
+
+### get_referring_domains
+
+Top referring domains sending traffic.
+
+- `start_date` / `end_date` **or** `date_range`
+- `limit` (number, optional, max 1000)
 
 ## API Limitations
 
-- Maximum date range: 31 days (enforced by Clicky API)
+- Maximum explicit date range: 31 days (Clicky API limit)
 - Maximum results per request: 1,000 items
-- One simultaneous request per IP address per site ID
+- One simultaneous request per IP per site ID
 
 ## Error Handling
 
-The server includes built-in error handling for:
-- Invalid date ranges (> 31 days)
-- API rate limits
-- Network errors
-- Invalid parameters
+Errors surfaced by the server include:
+- Missing or conflicting date parameters
+- Invalid calendar dates (e.g. `2024-02-30`)
+- Reversed or out-of-range date windows
+- Clicky API errors (rate limits, auth, network)
 
-All errors are returned with descriptive messages to help with debugging.
+All errors are returned with descriptive messages.
+
+## Testing
+
+```bash
+npm test                  # unit tests (offline, no credentials needed)
+npm run test:integration  # live smoke against the Clicky API (requires .env)
+```
+
+The unit suite covers `buildDateParam` validation, `ClickyClient` parameter shaping (via a stub axios), and the `get_traffic_sources` defensive transform — ~45 tests, runs in well under a second.
+
+A pre-push git hook (in `.githooks/pre-push`) auto-runs `npm test` before any push that updates the remote `main` branch. It's installed automatically by the `prepare` script after `npm install`. Pushes to feature branches are not gated. To bypass in an emergency: `git push --no-verify`.
 
 ## Development
-
-The project structure:
 
 ```
 clicky-mcp/
 ├── src/
 │   ├── index.ts              # Main MCP server
 │   ├── clicky-client.ts      # Clicky API client
-│   └── tools/
-│       ├── get-total-visitors.ts
-│       ├── get-domain-visitors.ts
-│       ├── get-top-pages.ts
-│       ├── get-traffic-sources.ts
-│       └── get-page-traffic.ts
+│   ├── date-utils.ts         # Shared date param builder
+│   └── tools/                # One file per tool
 ├── package.json
 ├── tsconfig.json
 └── README.md

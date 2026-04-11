@@ -2,10 +2,10 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { ClickyClient } from '../clicky-client.js';
 import { buildDateParam, CLICKY_DATE_KEYWORDS, DateInput } from '../date-utils.js';
 
-export const getTopPagesTool: Tool = {
-  name: 'get_top_pages',
+export const getSearchesTool: Tool = {
+  name: 'get_searches',
   description:
-    'Get top pages for a date range from Clicky analytics. Provide EITHER start_date+end_date OR date_range.',
+    'Get top search terms that brought visitors to the site for a date range. Provide EITHER start_date+end_date OR date_range.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -28,18 +28,18 @@ export const getTopPagesTool: Tool = {
         type: 'number',
         minimum: 1,
         maximum: 1000,
-        description: 'Maximum number of pages to return (max 1000)',
+        description: 'Maximum number of search terms to return (max 1000)',
       },
     },
   },
 };
 
-export async function handleGetTopPages(
+export async function handleGetSearches(
   args: DateInput & { limit?: number },
   clickyClient: ClickyClient
 ) {
   const date = buildDateParam(args);
-  const data = await clickyClient.getTopPages(date, args.limit);
+  const data = await clickyClient.getSearches(date, args.limit);
   return {
     content: [{ type: 'text', text: JSON.stringify(data, null, 2) }],
   };

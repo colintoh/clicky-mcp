@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// import { config } from 'dotenv';
+import { config } from 'dotenv';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -14,11 +14,16 @@ import { getDomainVisitorsTool, handleGetDomainVisitors } from './tools/get-doma
 import { getTopPagesTool, handleGetTopPages } from './tools/get-top-pages.js';
 import { getTrafficSourcesTool, handleGetTrafficSources } from './tools/get-traffic-sources.js';
 import { getPageTrafficTool, handleGetPageTraffic } from './tools/get-page-traffic.js';
-
-// config({ path: '.env' });
+import { getVisitorsOnlineTool, handleGetVisitorsOnline } from './tools/get-visitors-online.js';
+import { getActionsTool, handleGetActions } from './tools/get-actions.js';
+import { getBounceRateTool, handleGetBounceRate } from './tools/get-bounce-rate.js';
+import { getCountriesTool, handleGetCountries } from './tools/get-countries.js';
+import { getSearchesTool, handleGetSearches } from './tools/get-searches.js';
+import { getReferringDomainsTool, handleGetReferringDomains } from './tools/get-referring-domains.js';
 
 function getCredentials() {
-  // Check command line arguments first
+  config({ path: '.env' });
+
   const args = process.argv.slice(2);
   let siteId = '';
   let siteKey = '';
@@ -33,7 +38,6 @@ function getCredentials() {
     }
   }
 
-  // Fall back to environment variables
   if (!siteId) {
     siteId = process.env.CLICKY_SITE_ID || '';
   }
@@ -41,7 +45,6 @@ function getCredentials() {
     siteKey = process.env.CLICKY_SITE_KEY || '';
   }
 
-  // Validate credentials are provided
   if (!siteId || !siteKey) {
     console.error('Error: Clicky credentials are required');
     console.error('');
@@ -95,6 +98,12 @@ class ClickyMCPServer {
         getTopPagesTool,
         getTrafficSourcesTool,
         getPageTrafficTool,
+        getVisitorsOnlineTool,
+        getActionsTool,
+        getBounceRateTool,
+        getCountriesTool,
+        getSearchesTool,
+        getReferringDomainsTool,
       ],
     }));
 
@@ -117,6 +126,24 @@ class ClickyMCPServer {
 
           case 'get_page_traffic':
             return await handleGetPageTraffic(args as any, this.clickyClient);
+
+          case 'get_visitors_online':
+            return await handleGetVisitorsOnline(args, this.clickyClient);
+
+          case 'get_actions':
+            return await handleGetActions(args as any, this.clickyClient);
+
+          case 'get_bounce_rate':
+            return await handleGetBounceRate(args as any, this.clickyClient);
+
+          case 'get_countries':
+            return await handleGetCountries(args as any, this.clickyClient);
+
+          case 'get_searches':
+            return await handleGetSearches(args as any, this.clickyClient);
+
+          case 'get_referring_domains':
+            return await handleGetReferringDomains(args as any, this.clickyClient);
 
           default:
             throw new Error(`Unknown tool: ${name}`);
